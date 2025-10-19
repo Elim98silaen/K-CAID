@@ -1,0 +1,220 @@
+import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Sparkles } from "lucide-react";
+import { Canvas } from "@react-three/fiber"; // 3D integration
+import { OrbitControls } from "@react-three/drei";
+
+// Simple 3D Box for demonstration
+function SimpleBox() {
+  return (
+    <mesh>
+      <boxGeometry args={[1, 1, 1]} />
+      <meshStandardMaterial color="orange" />
+    </mesh>
+  );
+}
+
+export default function NeoCADPrototype() {
+  const canvasRef = useRef(null);
+  const [starCount, setStarCount] = useState(200);
+  const [darkMode, setDarkMode] = useState(true);
+  const [dragging, setDragging] = useState(false);
+  const [dragPos, setDragPos] = useState({ x: 0, y: 0 });
+
+  // --- Starfield effect ---
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    let stars = Array.from({ length: starCount }).map(() => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      size: Math.random() * 1.5,
+      speed: Math.random() * 0.3 + 0.1,
+    }));
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      stars.forEach((star) => {
+        star.x = Math.random() * window.innerWidth;
+        star.y = Math.random() * window.innerHeight;
+      });
+    };
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach((star) => {
+        ctx.fillStyle = `rgba(255, 255, 255, ${Math.random()})`;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.size, 0, 2 * Math.PI);
+        ctx.fill();
+        star.y -= star.speed;
+        if (star.y < 0) star.y = canvas.height;
+      });
+      requestAnimationFrame(animate);
+    };
+
+    resize();
+    animate();
+    window.addEventListener("resize", resize);
+
+    return () => window.removeEventListener("resize", resize);
+  }, [starCount]);
+
+  // --- Mode switching ---
+  const bgColor = darkMode ? "bg-black" : "bg-white";
+  const textColor = darkMode ? "text-white" : "text-black";
+  const descColor = darkMode ? "text-gray-300" : "text-gray-700";
+
+  // --- Drag logic for viewport ---
+  const viewportRef = useRef(null);
+  const handleDragStart = (e) => {
+    setDragging(true);
+    setDragPos({
+      x: e.clientX - viewportRef.current.offsetLeft,
+      y: e.clientY - viewportRef.current.offsetTop,
+    });
+  };
+  const handleDragEnd = () => setDragging(false);
+  const handleDrag = (e) => {
+    if (dragging && viewportRef.current) {
+      viewportRef.current.style.left = `${e.clientX - dragPos.x}px`;
+      viewportRef.current.style.top = `${e.clientY - dragPos.y}px`;
+    }
+  };
+  useEffect(() => {
+    if (dragging) {
+      window.addEventListener("mousemove", handleDrag);
+      window.addEventListener("mouseup", handleDragEnd);
+    } else {
+      window.removeEventListener("mousemove", handleDrag);
+      window.removeEventListener("mouseup", handleDragEnd);
+    }
+    return () => {
+      window.removeEventListener("mousemove", handleDrag);
+      window.removeEventListener("mouseup", handleDragEnd);
+    };
+  }, [dragging]);
+
+  // --- Menu ---
+  const menuItems = [
+    { name: "Home", href: "#" },
+    { name: "About", href: "#" },
+    { name: "Contact", href: "#" },
+  ];
+
+  return (
+    <div className={`relative min-h-screen ${bgColor} ${textColor} flex flex-col items-center justify-center overflow-hidden`}>
+      {/* Navigation */}
+      <nav className="absolute top-0 left-0 w-full flex justify-center z-20 py-4 bg-gray-900/50 backdrop-blur-md">
+        {menuItems.map(item => (
+          <a
+            key={item.name}
+            href={item.href}
+            className="mx-4 text-lg font-semibold hover:underline"
+          >
+            {item.name}
+          </a>
+        ))}
+        {/* Mode toggle */}
+        <Button
+          className="ml-8 px-4 py-2 rounded-full font-semibold"
+          onClick={() => setDarkMode(!darkMode)}
+        >
+          {darkMode ? "🌞 Terang" : "🌙 Gelap"}
+        </Button>
+      </nav>
+
+      {/* Animated background stars */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <canvas ref={canvasRef} className="absolute w-full h-full" />
+      </div>
+
+      {/* Fitur: tombol jumlah bintang */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4, duration: 1 }}
+        className="z-10 mt-8 flex items-center gap-4"
+      >
+        <label htmlFor="starSlider" className="font-bold text-cyan-400">Jumlah Bintang:</label>
+        <input
+          id="starSlider"
+          type="range"
+          min={50}
+          max={600}
+          value={starCount}
+          onChange={e => setStarCount(Number(e.target.value))}
+          className="w-40"
+        />
+        <span className="font-mono">{starCount}</span>
+      </motion.div>
+
+      {/* Animated title with extra effects */}
+      <motion.h1
+        initial={{ opacity: 0, y: -50, rotate: -10, scale: 0.9, textShadow: "0 0 0px #fff" }}
+        animate={{ opacity: 1, y: 0, rotate: [0, 10, 0], scale: 1.1, textShadow: "0 0 16px #0ff" }}
+        transition={{ duration: 1.6, type: "spring" }}
+        className="z-10 text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-600 drop-shadow-lg"
+      >
+        NeoCAD Prototype v0.1
+      </motion.h1>
+
+      {/* Description */}
+      <motion.p
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 1.2 }}
+        className={`z-10 mt-4 max-w-2xl text-center ${descColor}`}
+      >
+        Tahap awal eksplorasi sistem NeoCAD. Prototype ini menggambarkan konsep antarmuka dan koneksi awal antara NeoCore, NeoSim, NeoNet, dan NeoVision untuk desain AI-imersif.
+      </motion.p>
+
+      {/* Interactive 3D viewport section (with drag) */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 1.2 }}
+        className="z-10 mt-12 border border-gray-700 rounded-3xl p-10 bg-gray-900/40 backdrop-blur-md shadow-2xl w-[80%] max-w-4xl relative"
+      >
+        <h2 className="text-2xl mb-6 font-semibold text-cyan-400">Demo Visualization</h2>
+        <p className={`mb-4 ${darkMode ? "text-gray-400" : "text-gray-700"}`}>
+          Visualisasi awal model 3D modular: ini adalah tahap awal sistem rendering real-time yang akan terhubung ke modul NeoVision untuk AR & VR.
+        </p>
+        {/* Drag area */}
+        <div
+          ref={viewportRef}
+          className="w-full h-64 bg-black/60 border border-gray-800 rounded-xl flex items-center justify-center cursor-move absolute"
+          style={{ position: "absolute", left: "0px", top: "0px" }}
+          onMouseDown={handleDragStart}
+        >
+          {/* 3D model */}
+          <Canvas style={{ width: "100%", height: "100%", borderRadius: "0.75rem" }}>
+            <ambientLight />
+            <pointLight position={[10, 10, 10]} />
+            <SimpleBox />
+            <OrbitControls />
+          </Canvas>
+        </div>
+      </motion.div>
+
+      {/* Button with output logic */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8, duration: 1.2 }}
+        className="z-10 mt-[20rem]" // adjust to avoid overlapping with draggable viewport
+      >
+        <Button
+          className="bg-gradient-to-r from-cyan-500 to-indigo-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:scale-105 transition-transform flex items-center gap-3"
+          onClick={() => alert("Selamat datang di NeoCAD Prototype!")}
+        >
+          <Sparkles className="h-5 w-5" /> Enter Prototype
+        </Button>
+      </motion.div>
+    </div>
+  );
+}

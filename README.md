@@ -50,3 +50,41 @@ K-CAID/
 ├── assets/
 ├── docs/
 └── prototype/
+
+
+---
+
+## ⚖️ License & Declaration
+
+K-CAID dilindungi oleh **Lisensi Ganda**:
+
+1. **AGPL-3.0 License**  
+   Memberi kebebasan untuk menggunakan, memodifikasi, dan mendistribusikan kode,  
+   selama perubahan tetap terbuka untuk komunitas.
+
+2. **CC BY-SA 4.0 License**  
+   Melindungi semua ide, manifesto, dan representasi kreatif agar tidak digunakan tanpa atribusi.
+
+📜 **Deklarasi & Lisensi Resmi:**  
+[📄 Unduh K-CAID_License_and_Declaration.pdf](./K-CAID_License_and_Declaration.pdf)
+
+---
+
+## 🧠 Pencipta & Visi
+**Founder:** *Elim Slim*  
+**Konsep & Manifesto:** *K-CAID_Manifesto.jsx*  
+**Filosofi:** *Membangun peradaban manusia bersama AI menuju masa depan Kardashev.*
+
+---
+
+## 🚀 Bergabung
+> “Revolusi dimulai dari satu baris kode,  
+> tapi akan mengguncang seluruh peradaban.”
+
+[🔥 Join the Revolution](#)
+
+---
+
+© 2025 K-CAID Project — Dual Licensed under AGPLv3 + CC BY-SA 4.0
+
+
